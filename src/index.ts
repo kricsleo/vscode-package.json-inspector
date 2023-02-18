@@ -1,7 +1,8 @@
 import { window } from 'vscode'
 
 export function activate() {
-  window.showInformationMessage('Hello')
+  console.log('vscode-package.json inspector start');
+  window.showInformationMessage('Hello, vscode-package.json inspector!')
 }
 
 export function deactivate() {
