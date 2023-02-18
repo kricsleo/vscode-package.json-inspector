@@ -1,4 +1,4 @@
-import { window, ExtensionContext, languages, CancellationToken, Position, TextDocument, Hover, Location, Uri } from 'vscode'
+import { ExtensionContext, languages, Position, TextDocument, Hover, Location, Uri } from 'vscode'
 import { dirname } from 'path'
 import { constants } from 'fs'
 import { access } from 'fs/promises'
@@ -15,6 +15,7 @@ export function activate(context: ExtensionContext) {
 }
 
 async function provideDefinition(document: TextDocument, position: Position) {
+  console.log('vscode-package.json-inspector definition');
   const dependency = await getDependencyPath(document, position)
   if(!dependency || !dependency.exsit) {
     return null
@@ -26,6 +27,7 @@ async function provideDefinition(document: TextDocument, position: Position) {
 }
 
 async function provideHover(document: TextDocument, position: Position) {
+  console.log('vscode-package.json-inspector hovering');
   const dependency = await getDependencyPath(document, position)
   if(!dependency || !dependency.exsit) {
     return null
@@ -40,9 +42,6 @@ current version: ${dependencyPkg.version}
 }
 
 async function getDependencyPath(document: TextDocument, position: Position) {
-  // if(!isPkgJSON(document.fileName)) {
-  //   return null
-  // }
   const safeDependencyWordRange = document.getWordRangeAtPosition(
     position,
     // reg: "lodash", (including prefix and suffix quotation marks to make it more accurate)
@@ -59,8 +58,3 @@ async function getDependencyPath(document: TextDocument, position: Position) {
     .catch(() => false)
   return { path: dependencyPkgJSON, exsit: isDependencyExsit }
 }
-
-function isPkgJSON(filename: string) {
-  return /\/?package\.json$/.test(filename)
-} 
-
