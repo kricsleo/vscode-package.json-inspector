@@ -1,4 +1,4 @@
-import { ExtensionContext, languages, Position, TextDocument, Hover, Location, Uri } from 'vscode'
+import { ExtensionContext, languages, Position, TextDocument, Hover, Location, Uri, LocationLink, Range } from 'vscode'
 import { dirname } from 'path'
 import { constants } from 'fs'
 import { access } from 'fs/promises'
@@ -20,10 +20,11 @@ async function provideDefinition(document: TextDocument, position: Position) {
   if(!dependency || !dependency.exsit) {
     return null
   }
-  return new Location(
-    Uri.file(dependency.path),
-    new Position(0, 0)
-  );
+  return <LocationLink[]>[{
+    originSelectionRange: dependency.range,
+    targetUri: Uri.file(dependency.path),
+    targetRange: new Range(new Position(0, 0), new Position(0, 0))
+  }]
 }
 
 async function provideHover(document: TextDocument, position: Position) {
@@ -38,23 +39,28 @@ async function provideHover(document: TextDocument, position: Position) {
 ${dependencyPkg.description || 'No description.'}\n
 current version: ${dependencyPkg.version}
 `
-  return new Hover(content)
+  return new Hover(content, dependency.range)
 }
 
 async function getDependencyPath(document: TextDocument, position: Position) {
+  const pkgNameRule = '(?:@[a-z0-9-*~][a-z0-9-*._~]*/)?[a-z0-9-~][a-z0-9-._~]*'
   const safeDependencyWordRange = document.getWordRangeAtPosition(
     position,
     // reg: "lodash", (including prefix and suffix quotation marks to make it more accurate)
-    new RegExp('"(?:@[a-z0-9-*~][a-z0-9-*._~]*/)?[a-z0-9-~][a-z0-9-._~]*"')
+    new RegExp(`"${pkgNameRule}"`)
   )
   if(!safeDependencyWordRange) {
     return null
   }
+  const dependencyWordRange = document.getWordRangeAtPosition(
+    position,
+    new RegExp(pkgNameRule)
+  )
   const dependencyName = document.getText(safeDependencyWordRange).replace(/"/g, '')
   const currentDir = dirname(document.fileName)
   const dependencyPkgJSON = `${currentDir}/node_modules/${dependencyName}/package.json`
   const isDependencyExsit = await access(dependencyPkgJSON, constants.R_OK)
     .then(() => true)
     .catch(() => false)
-  return { path: dependencyPkgJSON, exsit: isDependencyExsit }
+  return { path: dependencyPkgJSON, exsit: isDependencyExsit, range: dependencyWordRange }
 }
