@@ -4,7 +4,7 @@
 </h1>
 
 <p align="center">
-  <a href="https://marketplace.visualstudio.com/items?itemName=kricsleo.vscode-package-json-inspector" target="__blank"><img src="https://img.shields.io/visual-studio-marketplace/v/kricsleo.vscode-package-json-inspector.svg?color=eee&amp;label=VS%20Code%20Marketplace&logo=visual-studio-code" alt="Visual Studio Marketplace Version"></a>
+  <a href="https://marketplace.visualstudio.com/items?itemName=kricsleo.vscode-package-json-inspector" target="_blank"><img src="https://img.shields.io/visual-studio-marketplace/v/kricsleo.vscode-package-json-inspector?label=Marketplace&style=for-the-badge" alt="Visual Studio Marketplace Version"></a>
 </p>
 
 ## Preview
