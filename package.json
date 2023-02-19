@@ -1,6 +1,6 @@
 {
   "publisher": "kricsleo",
-  "name": "vscode-package.json-inspector",
+  "name": "vscode-package-json-inspector",
   "displayName": "package.json inspector",
   "version": "0.0.0",
   "private": true,
@@ -20,7 +20,6 @@
     "Other"
   ],
   "main": "./dist/index.js",
-  "icon": "res/icon.png",
   "files": [
     "dist"
   ],
@@ -35,7 +34,7 @@
     "dev": "nr build --watch",
     "vscode:prepublish": "nr build",
     "publish": "vsce publish --no-dependencies",
-    "pack": "vsce package --no-dependencies",
+    "pack": "vsce package",
     "test": "vitest",
     "typecheck": "tsc --noEmit",
     "release": "bumpp && nr publish"
@@ -47,5 +46,8 @@
     "tsup": "^6.2.1",
     "typescript": "^4.7.4",
     "vsce": "^2.10.0"
+  },
+  "dependencies": {
+    "ofetch": "^1.0.1"
   }
 }
