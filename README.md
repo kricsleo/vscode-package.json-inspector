@@ -1,11 +1,34 @@
-<h1 align="center">vscode-package.json-inspector</h1>
+<h1 align="center">
+  <img src="./icon.png" alt="logo" width="128" />
+  <p>Npm package.json Inspector for VS Code</p>
+</h1>
 
-<a href="https://marketplace.visualstudio.com/items?itemName=kricsleo.vscode-package.json-inspector" target="__blank"><img src="https://img.shields.io/visual-studio-marketplace/v/kricsleo.vscode-package.json-inspector.svg?color=eee&amp;label=VS%20Code%20Marketplace&logo=visual-studio-code" alt="Visual Studio Marketplace Version" /></a>
+<p align="center">
+  <a href="https://marketplace.visualstudio.com/items?itemName=kricsleo.vscode-package.json-inspector" target="__blank"><img src="https://img.shields.io/visual-studio-marketplace/v/kricsleo.vscode-package.json-inspector.svg?color=eee&amp;label=VS%20Code%20Marketplace&logo=visual-studio-code" alt="Visual Studio Marketplace Version" />
+</p>
 
-- [x] Inspect npm dependencies in package.json
-- [ ] Display GZip size of npm dependencies
-- [ ] More hover info
-- [ ] Chore: style
+## Preview
+
+### Hover to see metadata of package
+
+<p align="center">
+  <img src="./screenshot/hover.png" alt="preview hover" />
+</p>
+
+- `title`: with a link if the `homepage` field is provided
+- `description`: hidden if no description
+- `GZipped size`: powered by [bundlephobia.com](https://bundlephobia.com), only for public npm packages
+- `version`: currently using and the latest
+
+### **<kbd>cmd</kbd> + click** to goto node_modules
+
+<p align="center">
+  <img src="./screenshot/click.gif" alt="preview click" />
+</p>
+
+## Install
+
+👉 [Install in marketplace of VS Code](https://marketplace.visualstudio.com/items?itemName=kricsleo.vscode-package.json-inspector)
 
 
 ## License
