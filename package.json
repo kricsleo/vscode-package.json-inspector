@@ -1,11 +1,11 @@
 {
   "publisher": "kricsleo",
   "name": "vscode-package-json-inspector",
-  "displayName": "package.json inspector",
+  "displayName": "Npm package.json Inspector",
   "version": "0.0.0",
   "private": true,
   "packageManager": "pnpm@7.8.0",
-  "description": "",
+  "description": "Inspect npm packages in package.json file",
   "author": "Kricsleo <kricsleo@163.com>",
   "license": "MIT",
   "homepage": "https://github.com/kricsleo/vscode-package.json-inspector#readme",
@@ -29,6 +29,7 @@
   "activationEvents": [
     "onStartupFinished"
   ],
+  "icon": "icon.png",
   "scripts": {
     "build": "tsup src/index.ts --external vscode",
     "dev": "nr build --watch",

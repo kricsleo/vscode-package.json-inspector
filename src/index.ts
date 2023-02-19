@@ -44,7 +44,7 @@ async function provideHover(document: TextDocument, position: Position) {
 ${dependencyPkg.description ? `${dependencyPkg.description}\n` : ''}
 🗜️ GZIPPED: ${dependencyBundlePhobia?.gzip 
     ? `[\`${formatByteSize(dependencyBundlePhobia.gzip)}\`](https://bundlephobia.com/package/${dependencyPkg.name}@${dependencyPkg.version})`
-    : '\`unknown\`'}\n
+    : '\`unknown size\`'}\n
 ✨ VERSION: \`${dependencyPkg.version}\`(current) &nbsp;/&nbsp; \`${latestDependencyPkg?.version || 'unknown'}\`(latest)
 `
   return new Hover(hoverContent, dependency.range)
