@@ -34,7 +34,7 @@
     "dev": "nr build --watch",
     "vscode:prepublish": "nr build",
     "publish": "vsce publish --no-dependencies",
-    "pack": "vsce package",
+    "pack": "vsce package --no-dependencies",
     "test": "vitest",
     "typecheck": "tsc --noEmit",
     "release": "bumpp && nr publish"
@@ -46,8 +46,5 @@
     "tsup": "^6.2.1",
     "typescript": "^4.7.4",
     "vsce": "^2.10.0"
-  },
-  "dependencies": {
-    "ofetch": "^1.0.1"
   }
 }
