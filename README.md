@@ -28,7 +28,7 @@
 
 ## Install
 
-👉 [Install in marketplace of VS Code](https://marketplace.visualstudio.com/items?itemName=kricsleo.vscode-package.json-inspector)
+👉 Install it in the [marketplace of VS Code](https://marketplace.visualstudio.com/items?itemName=kricsleo.vscode-package.json-inspector)
 
 
 ## License
