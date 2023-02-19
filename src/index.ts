@@ -1,4 +1,4 @@
-import { ExtensionContext, languages, Position, TextDocument, Hover, Location, Uri, LocationLink, Range } from 'vscode'
+import { ExtensionContext, languages, Position, TextDocument, Hover, Location, Uri, LocationLink, Range, MarkdownString } from 'vscode'
 import { dirname } from 'path'
 import { constants } from 'fs'
 import { access } from 'fs/promises'
@@ -30,7 +30,7 @@ async function provideDefinition(document: TextDocument, position: Position) {
 }
 
 async function provideHover(document: TextDocument, position: Position) {
-  console.log('vscode-package.json-inspector hovering');
+  console.log('vscode-package.json-inspector hover');
   const dependency = await getDependencyPath(document, position)
   if(!dependency || !dependency.exsit) {
     return null
@@ -38,21 +38,17 @@ async function provideHover(document: TextDocument, position: Position) {
   const dependencyPkg = require(dependency.path)
   const [latestDependencyPkg, dependencyBundlePhobia] = await Promise.all([
     getLatestPkg(dependency.name, dependency.dir).catch(() => null),
-    getBundlePhobiaPkg(`${dependency.name}@${dependencyPkg.version}`).catch((e) => {
-      console.log('e', e)
-
-    }),
+    getBundlePhobiaPkg(`${dependency.name}@${dependencyPkg.version}`).catch(() => null),
   ])
-
-  const content =
-`${dependencyPkg.name}\n
-${dependencyPkg.description || 'No description.'}\n
-min+gzip: ${dependencyBundlePhobia?.gzip ? formatByteSize(dependencyBundlePhobia.gzip) : 'unknown'}\n
-|         | current | latest |
-|---------|---------|--------|
-| version | ${dependencyPkg.version}  | ${latestDependencyPkg.version}  |
+  const hoverContent =
+`### ${dependencyPkg.homepage ? `[${dependencyPkg.name}](${dependencyPkg.homepage})` : dependencyPkg.name}
+${dependencyPkg.description ? `${dependencyPkg.description}\n` : ''}
+🗜️ GZIPPED: ${dependencyBundlePhobia?.gzip 
+    ? `[\`${formatByteSize(dependencyBundlePhobia.gzip)}\`](https://bundlephobia.com/package/${dependencyPkg.name}@${dependencyPkg.version})`
+    : '\`unknown\`'}\n
+✨ VERSION: \`${dependencyPkg.version}\`(current) &nbsp;/&nbsp; \`${latestDependencyPkg?.version || 'unknown'}\`(latest)
 `
-  return new Hover(content, dependency.range)
+  return new Hover(hoverContent, dependency.range)
 }
 
 async function getDependencyPath(document: TextDocument, position: Position) {
