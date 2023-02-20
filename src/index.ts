@@ -2,7 +2,7 @@ import { ExtensionContext, languages, Position, TextDocument, Hover, Location, U
 import { dirname } from 'path'
 import { constants } from 'fs'
 import { access } from 'fs/promises'
-import { execCmd, fetch, formatByteSize } from './util'
+import { execCmd, fetch, formatByteSize, formatTexts2Table, formatTimeBySize } from './util'
 
 export function activate(context: ExtensionContext) {
   console.log('vscode-package.json-inspector start');
@@ -36,16 +36,24 @@ async function provideHover(document: TextDocument, position: Position) {
   }
   const dependencyPkg = require(dependency.path)
   const [latestDependencyPkg, dependencyBundlePhobia] = await Promise.all([
-    getLatestPkg(dependency.name, dependency.cwd).catch(e => null),
+    getLatestPkg(dependency.name, dependency.cwd).catch(() => null),
     getBundlePhobiaPkg(`${dependency.name}@${dependencyPkg.version}`).catch(() => null),
   ])
+  const tips = [
+    ['✨ Version: ', `\`${dependencyPkg.version}\`(current) &nbsp;/&nbsp; \`${latestDependencyPkg?.version || 'unknown'}\`(latest)`],
+  ]
+  dependencyBundlePhobia && tips.push(
+    ['🗜️ Size: ', `\`${formatByteSize(dependencyBundlePhobia.gzip)}\`(gzipped) &nbsp;/&nbsp; \`${formatByteSize(dependencyBundlePhobia.size)}\`(minified)`],
+    ['⏳ Download time:', `\`${formatTimeBySize(dependencyBundlePhobia.gzip)}\`(in 4G)`],
+    ['📎 Dependencies: ', `\`${dependencyBundlePhobia.dependencyCount}\``],
+    ['🍃 Tree shakeable: ', dependencyBundlePhobia.hasJSModule || dependencyBundlePhobia.hasJSNext || dependencyBundlePhobia.isModuleType ? '✅' : '❎'],
+    ['🧂 Side effects free: &nbsp;&nbsp;', dependencyBundlePhobia.hasSideEffects ? '❎' : '✅'],
+  )
   const hoverContent =
-`### ${dependencyPkg.homepage ? `[${dependencyPkg.name}](${dependencyPkg.homepage})` : dependencyPkg.name}
+`
+### ${dependencyPkg.homepage ? `[${dependencyPkg.name}](${dependencyPkg.homepage})` : dependencyPkg.name}
 ${dependencyPkg.description ? `${dependencyPkg.description}\n` : ''}
-🗜️ GZIPPED: ${dependencyBundlePhobia?.gzip 
-    ? `[\`${formatByteSize(dependencyBundlePhobia.gzip)}\`](https://bundlephobia.com/package/${dependencyPkg.name}@${dependencyPkg.version})`
-    : '\`unknown size\`'}\n
-✨ VERSION: \`${dependencyPkg.version}\`(current) &nbsp;/&nbsp; \`${latestDependencyPkg?.version || 'unknown'}\`(latest)
+${formatTexts2Table(tips)}
 `
   return new Hover(hoverContent, dependency.range)
 }
@@ -81,13 +89,20 @@ async function getDependencyPath(document: TextDocument, position: Position) {
   }
 }
 
+const latestPkgCache = new Map()
+const validPeriod = 3000
 async function getLatestPkg(pkg: string, cwd: string) {
   const registry = await getNpmRegistry(pkg, cwd).catch(() => null)
   if(!registry) {
     return null
   }
+  if(latestPkgCache.has(pkg)) {
+    return latestPkgCache.get(pkg)
+  }
   const pkgURL = new URL(`/${pkg}/latest`, registry)
   const pkgJSON = await fetch(pkgURL.href)
+  latestPkgCache.set(pkg, pkgJSON)
+  setTimeout(() => latestPkgCache.delete(pkg), validPeriod)
   return pkgJSON
 }
 
@@ -102,7 +117,12 @@ async function getNpmRegistry(pkg: string, cwd: string) {
 }
 
 /** bundlephobia only supports npmjs.com packages */
+const bundlePhobiaCache = new Map()
 async function getBundlePhobiaPkg(pkg: string) {
+  if(bundlePhobiaCache.has(pkg)) {
+    return bundlePhobiaCache.get(pkg)
+  }
   const result = await fetch(`https://bundlephobia.com/api/size?package=${pkg}&record=true`)
+  bundlePhobiaCache.set(pkg, result)
   return result
 }

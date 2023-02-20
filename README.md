@@ -15,9 +15,9 @@
   <img src="./screenshot/hover.png" alt="preview hover" />
 </p>
 
-- `title`: with a link if the `homepage` field is provided
+- `title`: with a link if the package provide the `homepage` field
 - `description`: hidden if no description
-- `GZipped size`: powered by [bundlephobia.com](https://bundlephobia.com), only for public npm packages
+- `GZipped`: minified and GZipped size of package, only for public npm packages(powered by [bundlephobia.com](https://bundlephobia.com))
 - `version`: currently using and the latest version
 
 ### **<kbd>cmd</kbd> + click** to goto node_modules

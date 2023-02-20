@@ -22,9 +22,46 @@ export function formatByteSize(size: number) {
   if (Math.log10(size) < 3) {
     return size + 'B'
   } else if (Math.log10(size) < 6) {
-    return Math.round(size / 1024) + 'kB'
+    return (size / 1024).toFixed(1) + 'kB'
   } else {
-    return Math.round(size/1024/1024) + 'MB'
+    return (size/1024/1024).toFixed(1) + 'MB'
+  }
+}
+
+export function formatTimeBySize(size: number) {
+  // 4G download speed(KB/s), data from http://www.webpagetest.org/
+  const downloadSpeed = 7000 / 8 
+  const time = size / 1024 / downloadSpeed
+  if (time < 0.0005) {
+    return Math.round(time * 1000000) + 'μs'
+  } else if (time < 0.5) {
+    return Math.round(time * 1000) + 'ms'
+  } else {
+    return time + 's'
+  }
+}
+
+export function formatTexts2Table(texts: string[][]) {
+  const head = `
+| <!-- --> | <!-- --> |
+|----------|----------|
+  `
+  const body = texts.map(text => '| ' + text.join(' | ') + ' |\n').join('')
+  return head + body
+}
+
+export function alignTexts(texts: string[][]) {
+  const maxTitleLength = texts.reduce((length, [title]) => Math.max(title.length, length), 0)
+  const paddedText = texts.map(([title, desc]) => [padText(title, maxTitleLength), desc].join('')).join('\n')
+  console.log('paddedText', maxTitleLength, paddedText)
+  return paddedText
+
+  function padText(text: string, length: number) {
+    let paddedText = text
+    for(let i = text.length; i < length; i++) {
+      paddedText += '&nbsp;'
+    }
+    return paddedText
   }
 }
 
