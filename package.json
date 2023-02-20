@@ -2,7 +2,7 @@
   "publisher": "kricsleo",
   "name": "vscode-package-json-inspector",
   "displayName": "Npm package.json Inspector",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": true,
   "packageManager": "pnpm@7.8.0",
   "description": "Inspect npm packages in package.json file",
