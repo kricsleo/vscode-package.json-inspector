@@ -97,7 +97,7 @@ async function getDependencyPath(document: TextDocument, position: Position) {
 }
 
 const latestPkgCache = new Map()
-const validPeriod = 3000
+const validPeriod = 30000
 async function getLatestPkg(pkg: string, cwd: string) {
   const registry = await getNpmRegistry(pkg, cwd).catch(() => null)
   if(!registry) {
