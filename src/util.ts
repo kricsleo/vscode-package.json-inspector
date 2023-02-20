@@ -53,7 +53,6 @@ export function formatTexts2Table(texts: string[][]) {
 export function alignTexts(texts: string[][]) {
   const maxTitleLength = texts.reduce((length, [title]) => Math.max(title.length, length), 0)
   const paddedText = texts.map(([title, desc]) => [padText(title, maxTitleLength), desc].join('')).join('\n')
-  console.log('paddedText', maxTitleLength, paddedText)
   return paddedText
 
   function padText(text: string, length: number) {

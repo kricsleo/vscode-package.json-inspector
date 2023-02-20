@@ -39,9 +39,16 @@ async function provideHover(document: TextDocument, position: Position) {
     getLatestPkg(dependency.name, dependency.cwd).catch(() => null),
     getBundlePhobiaPkg(`${dependency.name}@${dependencyPkg.version}`).catch(() => null),
   ])
+  
+  const entries = [
+    ['main', dependencyPkg.main], 
+    ['module', dependencyPkg.module], 
+    ['types', dependencyPkg.types || dependencyPkg.typings]
+  ].filter(([, entry]) => entry).map(([name, entry]) => `[${name}](${entry})`).join('&nbsp;&nbsp;/&nbsp;&nbsp;')
   const tips = [
     ['✨ Version: ', `\`${dependencyPkg.version}\`(current) &nbsp;/&nbsp; \`${latestDependencyPkg?.version || 'unknown'}\`(latest)`],
   ]
+  entries.length && tips.unshift(['⛳ Entry: ', entries])
   dependencyBundlePhobia && tips.push(
     ['🗜️ Size: ', `\`${formatByteSize(dependencyBundlePhobia.gzip)}\`(gzipped) &nbsp;/&nbsp; \`${formatByteSize(dependencyBundlePhobia.size)}\`(minified)`],
     ['⏳ Download time:', `\`${formatTimeBySize(dependencyBundlePhobia.gzip)}\`(in 4G)`],
@@ -49,12 +56,12 @@ async function provideHover(document: TextDocument, position: Position) {
     ['🍃 Tree shakeable: ', dependencyBundlePhobia.hasJSModule || dependencyBundlePhobia.hasJSNext || dependencyBundlePhobia.isModuleType ? '✅' : '❎'],
     ['🧂 Side effects free: &nbsp;&nbsp;', dependencyBundlePhobia.hasSideEffects ? '❎' : '✅'],
   )
-  const hoverContent =
-`
+  const hoverContent = new MarkdownString(`
 ### ${dependencyPkg.homepage ? `[${dependencyPkg.name}](${dependencyPkg.homepage})` : dependencyPkg.name}
 ${dependencyPkg.description ? `${dependencyPkg.description}\n` : ''}
 ${formatTexts2Table(tips)}
-`
+`)
+hoverContent.baseUri = Uri.file(dependency.path)
   return new Hover(hoverContent, dependency.range)
 }
 
