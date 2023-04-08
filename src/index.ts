@@ -6,7 +6,7 @@ import { execCmd, fetch, formatByteSize, formatTexts2Table, formatTimeBySize } f
 
 export function activate(context: ExtensionContext) {
   console.log('vscode-package.json-inspector start');
-  const selector = [{ language: 'json', pattern: '**/package.json'}, { language: 'jsonc', pattern: '**/package.json'}]
+  const selector = [{ language: 'json', pattern: '**/package.json'}, { language: 'jsonc', pattern: '**/package.json'}, { language: 'json5', pattern: '**/package.json'}]
   context.subscriptions.push(
     // provide hover detail
     languages.registerHoverProvider(selector, { provideHover }),
@@ -18,7 +18,7 @@ export function activate(context: ExtensionContext) {
 async function provideDefinition(document: TextDocument, position: Position) {
   console.log('vscode-package.json-inspector definition');
   const dependency = await getDependencyPath(document, position)
-  if(!dependency || !dependency.exsit) {
+  if(!dependency || !dependency.exist) {
     return null
   }
   return [{
@@ -31,7 +31,7 @@ async function provideDefinition(document: TextDocument, position: Position) {
 async function provideHover(document: TextDocument, position: Position) {
   console.log('vscode-package.json-inspector hover');
   const dependency = await getDependencyPath(document, position)
-  if(!dependency || !dependency.exsit) {
+  if(!dependency || !dependency.exist) {
     return null
   }
   const dependencyPkg = require(dependency.path)
@@ -81,17 +81,32 @@ async function getDependencyPath(document: TextDocument, position: Position) {
   )
   const dependencyName = document.getText(safeDependencyWordRange).replace(/"/g, '')
   const cwd = dirname(document.fileName)
-  const dependencyDir = `${cwd}/node_modules/${dependencyName}`
-  const dependencyPkgJSON = `${dependencyDir}/package.json`
-  const isDependencyExsit = await access(dependencyPkgJSON, constants.R_OK)
+  let dependencyDir = `${cwd}/node_modules/${dependencyName}`
+  let dependencyPkgJSON = `${dependencyDir}/package.json`
+  let isDependencyExist = await access(dependencyPkgJSON, constants.R_OK)
     .then(() => true)
     .catch(() => false)
+    if (!isDependencyExist) {
+      dependencyDir = dirname(
+        await execCmd(
+          `node -e "console.log(require.resolve('${dependencyName}/package.json'))"`,
+          cwd,
+        )
+          .then(res => res ?? '')
+          .catch(() => ''),
+      );
+  
+      dependencyPkgJSON = `${dependencyDir}/package.json`;
+      isDependencyExist = await access(dependencyPkgJSON, constants.R_OK)
+        .then(() => true)
+        .catch(() => false);
+    }
   return {
     cwd,
     name: dependencyName,
     dir: dependencyDir,
     path: dependencyPkgJSON,
-    exsit: isDependencyExsit, 
+    exist: isDependencyExist, 
     range: dependencyWordRange 
   }
 }
