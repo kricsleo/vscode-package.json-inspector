@@ -37,7 +37,7 @@ export function formatTimeBySize(size: number) {
   } else if (time < 0.5) {
     return Math.round(time * 1000) + 'ms'
   } else {
-    return time + 's'
+    return Math.round(time) + 's'
   }
 }
 
