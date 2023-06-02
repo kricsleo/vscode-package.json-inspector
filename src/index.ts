@@ -1,11 +1,10 @@
-import { ExtensionContext, languages, Position, TextDocument, Hover, Location, Uri, LocationLink, Range, MarkdownString } from 'vscode'
+import { ExtensionContext, languages, Position, TextDocument, Hover, Uri, LocationLink, Range, MarkdownString, workspace } from 'vscode'
 import { dirname } from 'path'
 import { constants } from 'fs'
 import { access } from 'fs/promises'
-import { execCmd, fetch, formatByteSize, formatTexts2Table, formatTimeBySize } from './util'
+import { createReg, execCmd, fetch, formatByteSize, formatTexts2Table, formatTimeBySize } from './util'
 
 export function activate(context: ExtensionContext) {
-  console.log('vscode-package.json-inspector start');
   const selector = [{ language: 'json', pattern: '**/package.json'}, { language: 'jsonc', pattern: '**/package.json'}, { language: 'json5', pattern: '**/package.json'}]
   context.subscriptions.push(
     // provide hover detail
@@ -16,7 +15,6 @@ export function activate(context: ExtensionContext) {
 }
 
 async function provideDefinition(document: TextDocument, position: Position) {
-  console.log('vscode-package.json-inspector definition');
   const dependency = await getDependencyPath(document, position)
   if(!dependency || !dependency.exist) {
     return null
@@ -29,7 +27,6 @@ async function provideDefinition(document: TextDocument, position: Position) {
 }
 
 async function provideHover(document: TextDocument, position: Position) {
-  console.log('vscode-package.json-inspector hover');
   const dependency = await getDependencyPath(document, position)
   if(!dependency || !dependency.exist) {
     return null
@@ -37,7 +34,7 @@ async function provideHover(document: TextDocument, position: Position) {
   const dependencyPkg = require(dependency.path)
   const [latestDependencyPkg, dependencyBundlePhobia] = await Promise.all([
     getLatestPkg(dependency.name, dependency.cwd).catch(() => null),
-    getBundlePhobiaPkg(`${dependency.name}@${dependencyPkg.version}`).catch(() => null),
+    getBundlePhobiaPkg(dependency.name, dependencyPkg.version).catch(() => null),
   ])
   
   const entries = [
@@ -61,7 +58,7 @@ async function provideHover(document: TextDocument, position: Position) {
 ${dependencyPkg.description ? `${dependencyPkg.description}\n` : ''}
 ${formatTexts2Table(tips)}
 `)
-hoverContent.baseUri = Uri.file(dependency.path)
+  hoverContent.baseUri = Uri.file(dependency.path)
   return new Hover(hoverContent, dependency.range)
 }
 
@@ -86,21 +83,21 @@ async function getDependencyPath(document: TextDocument, position: Position) {
   let isDependencyExist = await access(dependencyPkgJSON, constants.R_OK)
     .then(() => true)
     .catch(() => false)
-    if (!isDependencyExist) {
-      dependencyDir = dirname(
-        await execCmd(
-          `node -e "console.log(require.resolve('${dependencyName}/package.json'))"`,
-          cwd,
-        )
-          .then(res => res ?? '')
-          .catch(() => ''),
-      );
-  
-      dependencyPkgJSON = `${dependencyDir}/package.json`;
-      isDependencyExist = await access(dependencyPkgJSON, constants.R_OK)
-        .then(() => true)
-        .catch(() => false);
-    }
+  if (!isDependencyExist) {
+    dependencyDir = dirname(
+      await execCmd(
+        `node -e "console.log(require.resolve('${dependencyName}/package.json'))"`,
+        cwd,
+      )
+        .then(res => res ?? '')
+        .catch(() => ''),
+    );
+
+    dependencyPkgJSON = `${dependencyDir}/package.json`;
+    isDependencyExist = await access(dependencyPkgJSON, constants.R_OK)
+      .then(() => true)
+      .catch(() => false);
+  }
   return {
     cwd,
     name: dependencyName,
@@ -140,7 +137,12 @@ async function getNpmRegistry(pkg: string, cwd: string) {
 
 /** bundlephobia only supports npmjs.com packages */
 const bundlePhobiaCache = new Map()
-async function getBundlePhobiaPkg(pkg: string) {
+async function getBundlePhobiaPkg(pkgName: string, pkgVersion?: string) {
+  const pkgNameConf: string | undefined = workspace.getConfiguration('pkg.inspector').get('disableBundlephobia')
+  if(pkgNameConf && createReg(pkgNameConf).test(pkgName)) {
+    return
+  }
+  const pkg = pkgVersion ? pkgName + '@' + pkgVersion : pkgName
   if(bundlePhobiaCache.has(pkg)) {
     return bundlePhobiaCache.get(pkg)
   }

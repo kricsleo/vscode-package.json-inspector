@@ -27,10 +27,18 @@
   <img src="./screenshot/click.gif" alt="preview click" width="600" />
 </p>
 
+## Configuration
+
+Following settings are avaliable in `.vscode/settings.json`:
+
+- `'pkg.inspector.disableBundlephobia': string`
+  
+  Use regular expressions to match package names to disable the use of bundlephobia analysis packages. E.g., `'lodash'` or `'/lodash/'`.
+  
+
 ## Install
 
 👉 Install it in the [marketplace of VS Code](https://marketplace.visualstudio.com/items?itemName=kricsleo.vscode-package-json-inspector)
-
 
 ## License
 
